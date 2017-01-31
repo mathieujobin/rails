@@ -174,18 +174,24 @@ module ActiveRecord
         # returns the head of the queue.
         def wait_poll(timeout)
           @num_waiting += 1
+          Rollbar.info "Started waiting for a database connection. We are ##{@num_waiting}"
 
           t0 = Time.now
           elapsed = 0
           loop do
             @cond.wait(timeout - elapsed)
 
-            return remove if any?
+            if any?
+              return remove
+            else
+              msg = "Still no connection available, waiting: %d, connection in queue: %d" % [@num_waiting, @queue.size]
+              Rollbar.info msg
+            end
 
             elapsed = Time.now - t0
             if elapsed >= timeout
-              msg = 'could not obtain a database connection within %0.3f seconds (waited %0.3f seconds)' %
-                [timeout, elapsed]
+              msg = 'could not obtain a database connection within %0.3f seconds (waited %0.3f seconds); num_waiting: %d; queue size: %d' %
+              [timeout, elapsed, @num_waiting, @queue.size]
               raise ConnectionTimeoutError, msg
             end
           end
