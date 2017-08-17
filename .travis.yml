@@ -59,7 +59,7 @@ rvm:
 
 matrix:
   include:
-    - repository: mathieujobin
+    - repository: mathieujobin/rails
     - rvm: 2.4.1
       env: "GEM=av:ujs"
     - rvm: 2.2.7
