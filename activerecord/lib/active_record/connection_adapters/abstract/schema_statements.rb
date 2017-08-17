@@ -1041,7 +1041,7 @@ module ActiveRecord
         end
 
         unless migrated.include?(version)
-          execute "INSERT INTO #{sm_table} (version) VALUES (#{quote(version)})"
+          execute "INSERT INTO #{sm_table} (version, created_at, updated_at) VALUES (#{quote(version)}, #{quote(Time.now.to_s)}, #{quote(Time.now.to_s)})"
         end
 
         inserting = (versions - migrated).select { |v| v < version }
